@@ -3,39 +3,43 @@
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
--- Valores originais para restaurar depois
+local function getCharacter()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid")
+    return char, humanoid
+end
+
 local normalSpeed = 16
 local normalJump = 50
 
--- Função de poderes
+local currentChar, currentHumanoid = getCharacter()
+
 local function onChatted(msg)
     msg = msg:lower()
+    if not currentHumanoid or not currentHumanoid.Parent then return end
     if msg == "/speed" then
-        Character.Humanoid.WalkSpeed = 100
+        currentHumanoid.WalkSpeed = 100
         print("Super velocidade ativada!")
     elseif msg == "/jump" then
-        Character.Humanoid.JumpPower = 150
+        currentHumanoid.JumpPower = 150
         print("Super pulo ativado!")
     elseif msg == "/freeze" then
-        Character.Humanoid.WalkSpeed = 0
-        Character.Humanoid.JumpPower = 0
+        currentHumanoid.WalkSpeed = 0
+        currentHumanoid.JumpPower = 0
         print("Você está congelado!")
     elseif msg == "/unfreeze" then
-        Character.Humanoid.WalkSpeed = normalSpeed
-        Character.Humanoid.JumpPower = normalJump
+        currentHumanoid.WalkSpeed = normalSpeed
+        currentHumanoid.JumpPower = normalJump
         print("Você foi descongelado!")
     end
 end
 
--- Detectar quando o jogador digita no chat
 LocalPlayer.Chatted:Connect(onChatted)
 
--- Atualizar referência do personagem se morrer/respawnar
 LocalPlayer.CharacterAdded:Connect(function(char)
-    Character = char
-    char:WaitForChild("Humanoid")
+    currentChar = char
+    currentHumanoid = char:WaitForChild("Humanoid")
 end)
 
 print("Script de poderes carregado! Use /speed, /jump, /freeze, /unfreeze no chat.")
